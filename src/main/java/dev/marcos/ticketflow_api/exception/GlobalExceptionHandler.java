@@ -10,6 +10,20 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleNotFoundException(
+            NotFoundException ex, HttpServletRequest request) {
+
+        ProblemDetail problem =
+                new ProblemDetail(
+                        "Recurso não encontrado",
+                        ex.getMessage(),
+                        HttpStatus.NOT_FOUND.value(),
+                        getRequestPath(request));
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+    }
+
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ProblemDetail> handleBusinessException(
             BusinessException ex, HttpServletRequest request) {
