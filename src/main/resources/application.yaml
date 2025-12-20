@@ -16,3 +16,9 @@ spring:
     token:
       secret: ${SECURITY_TOKEN_SECRET:secret-jwt-token-key-dev}
       issuer: ${SECURITY_TOKEN_ISSUER:ticketflow-api}
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}

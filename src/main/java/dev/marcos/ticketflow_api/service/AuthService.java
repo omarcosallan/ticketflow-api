@@ -1,20 +1,23 @@
 package dev.marcos.ticketflow_api.service;
 
-import dev.marcos.ticketflow_api.dto.auth.AuthResponseDTO;
-import dev.marcos.ticketflow_api.dto.auth.LoginRequestDTO;
-import dev.marcos.ticketflow_api.dto.auth.RegisterRequestDTO;
-import dev.marcos.ticketflow_api.dto.auth.UserResponseDTO;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import dev.marcos.ticketflow_api.dto.auth.*;
 import dev.marcos.ticketflow_api.entity.User;
 import dev.marcos.ticketflow_api.exception.BusinessException;
 import dev.marcos.ticketflow_api.mapper.UserMapper;
 import dev.marcos.ticketflow_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.Objects;
 
 @Service
@@ -26,6 +29,9 @@ public class AuthService {
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
     private final UserMapper userMapper;
+
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String googleClientId;
 
     public UserResponseDTO register(RegisterRequestDTO dto) {
 
@@ -52,5 +58,61 @@ public class AuthService {
         User user = (User) Objects.requireNonNull(auth.getPrincipal());
         String token = tokenService.generateToken(user);
         return new AuthResponseDTO(token, user.getName(), user.getEmail());
+    }
+
+    public AuthResponseDTO loginWithGoogle(GoogleLoginRequestDTO dto) {
+        try {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                    .setAudience(Collections.singletonList(googleClientId))
+                    .build();
+
+            GoogleIdToken idToken = verifier.verify(dto.token());
+
+            if (idToken == null) {
+                throw new BusinessException("Token do Google inválido ou expirado");
+            }
+
+            GoogleIdToken.Payload payload = idToken.getPayload();
+            String email = payload.getEmail();
+            String googleId = payload.getSubject();
+            String name = (String) payload.get("name");
+            String pictureUrl = (String) payload.get("picture");
+            boolean emailVerified = (Boolean) payload.get("email_verified");
+
+            User user = userRepository.findByEmail(email)
+                    .map(existingUser -> updateExistingUser(existingUser, googleId, pictureUrl, emailVerified))
+                    .orElseGet(() -> createGoogleUser(email, name, googleId, pictureUrl, emailVerified));
+
+
+            String jwt = tokenService.generateToken(user);
+
+            return new AuthResponseDTO(jwt, user.getName(), user.getEmail());
+
+        } catch (Exception e) {
+            throw new BusinessException(e.getMessage());
+        }
+    }
+
+    private User updateExistingUser(User user, String googleId, String avatarUrl, boolean emailVerified) {
+        if (user.getGoogleId() == null) {
+            user.setGoogleId(googleId);
+            user.setAvatarUrl(avatarUrl);
+            user.setProvider("GOOGLE");
+            user.setEmailVerified(emailVerified);
+            userRepository.save(user);
+        }
+        return user;
+    }
+
+    private User createGoogleUser(String email, String name, String googleId, String avatarUrl, boolean emailVerified) {
+        User newUser = new User();
+        newUser.setEmail(email);
+        newUser.setName(name);
+        newUser.setGoogleId(googleId);
+        newUser.setAvatarUrl(avatarUrl);
+        newUser.setProvider("GOOGLE");
+        newUser.setEmailVerified(emailVerified);
+
+        return userRepository.save(newUser);
     }
 }

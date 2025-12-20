@@ -1,9 +1,6 @@
 package dev.marcos.ticketflow_api.controller;
 
-import dev.marcos.ticketflow_api.dto.auth.AuthResponseDTO;
-import dev.marcos.ticketflow_api.dto.auth.LoginRequestDTO;
-import dev.marcos.ticketflow_api.dto.auth.RegisterRequestDTO;
-import dev.marcos.ticketflow_api.dto.auth.UserResponseDTO;
+import dev.marcos.ticketflow_api.dto.auth.*;
 import dev.marcos.ticketflow_api.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,5 +30,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid LoginRequestDTO request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<AuthResponseDTO> googleLogin(@RequestBody GoogleLoginRequestDTO dto) {
+        AuthResponseDTO response = authService.loginWithGoogle(dto);
+        return ResponseEntity.ok(response);
     }
 }
