@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-@Builder
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProblemDetail {

@@ -10,12 +10,26 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ProblemDetail> handleBusinessException(
+            BusinessException ex, HttpServletRequest request) {
+
+        ProblemDetail problem =
+                new ProblemDetail(
+                        "Violação de regra de negócio",
+                        ex.getMessage(),
+                        HttpStatus.BAD_REQUEST.value(),
+                        getRequestPath(request));
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ProblemDetail> handleGenericException(HttpServletRequest request) {
         ProblemDetail problem =
                 new ProblemDetail(
-                        "Internal server error",
-                        "An unexpected error occurred",
+                        "Erro no servidor",
+                        "Ocorreu um erro inesperado.",
                         HttpStatus.INTERNAL_SERVER_ERROR.value(),
                         getRequestPath(request));
 

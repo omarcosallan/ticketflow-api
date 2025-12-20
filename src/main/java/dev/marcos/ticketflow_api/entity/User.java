@@ -66,7 +66,7 @@ public class User extends Auditable implements UserDetails {
 
     @Override
     public String getPassword() {
-        return "";
+        return passwordHash;
     }
 
     @Override
