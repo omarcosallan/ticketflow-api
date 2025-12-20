@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -30,4 +32,7 @@ public class Organization extends Auditable {
 
     @Column(name = "contact_email")
     private String contactEmail;
+
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
+    private final List<Member> members = new ArrayList<>();
 }

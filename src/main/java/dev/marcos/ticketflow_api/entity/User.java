@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -47,4 +49,7 @@ public class User extends Auditable {
 
     @Column(name = "email_verified", nullable = false)
     private Boolean emailVerified = false;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private final List<Member> memberships = new ArrayList<>();
 }
