@@ -12,5 +12,7 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
-  application:
-    name: ticketflow-api
+  security:
+    token:
+      secret: ${SECURITY_TOKEN_SECRET:secret-jwt-token-key-dev}
+      issuer: ${SECURITY_TOKEN_ISSUER:ticketflow-api}
