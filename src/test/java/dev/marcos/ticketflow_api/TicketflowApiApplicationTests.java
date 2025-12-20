@@ -1,0 +1,13 @@
+package dev.marcos.ticketflow_api;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class TicketflowApiApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}
