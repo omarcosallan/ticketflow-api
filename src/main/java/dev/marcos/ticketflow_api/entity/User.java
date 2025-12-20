@@ -52,4 +52,7 @@ public class User extends Auditable {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private final List<Member> memberships = new ArrayList<>();
+
+    @OneToMany(mappedBy = "customer")
+    private List<Ticket> tickets;
 }

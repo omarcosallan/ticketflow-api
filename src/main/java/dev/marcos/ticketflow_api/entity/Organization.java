@@ -33,6 +33,9 @@ public class Organization extends Auditable {
     @Column(name = "contact_email")
     private String contactEmail;
 
+    @OneToMany(mappedBy = "organization")
+    private final List<Event> events = new ArrayList<>();
+
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
     private final List<Member> members = new ArrayList<>();
 }
