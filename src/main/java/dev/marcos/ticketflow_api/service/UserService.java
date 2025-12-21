@@ -8,11 +8,18 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
+
+    public User findById(UUID userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
+    }
 
     @Override
     public User loadUserByUsername(String email) throws UsernameNotFoundException {

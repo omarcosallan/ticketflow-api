@@ -15,8 +15,8 @@ public class TokenService {
 
     private final Algorithm algorithm;
 
-    @Value("${spring.security.token.secret}")
-    private String secret;
+    @Value("${spring.security.jwt.access-token.expiration-hours}")
+    private Integer expirationHours;
 
     @Value("${spring.security.token.issuer}")
     private String issuer;
@@ -24,7 +24,6 @@ public class TokenService {
     public TokenService(@Value("${spring.security.token.secret}") String secret,
                         @Value("${spring.security.token.issuer}") String issuer) {
         this.algorithm = Algorithm.HMAC256(secret);
-        this.secret = secret;
         this.issuer = issuer;
     }
 
@@ -46,6 +45,8 @@ public class TokenService {
     }
 
     private Instant genExpirationDate() {
-        return LocalDateTime.now().plusHours(24).toInstant(ZoneOffset.of("-03:00"));
+        return LocalDateTime.now()
+                .plusHours(expirationHours)
+                .toInstant(ZoneOffset.of("-03:00"));
     }
 }

@@ -5,6 +5,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import dev.marcos.ticketflow_api.dto.auth.*;
+import dev.marcos.ticketflow_api.entity.RefreshToken;
 import dev.marcos.ticketflow_api.entity.User;
 import dev.marcos.ticketflow_api.exception.BusinessException;
 import dev.marcos.ticketflow_api.mapper.UserMapper;
@@ -14,11 +15,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +30,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
+    private final RefreshTokenService refreshTokenService;
     private final AuthenticationManager authenticationManager;
     private final UserMapper userMapper;
 
@@ -56,8 +60,11 @@ public class AuthService {
         UsernamePasswordAuthenticationToken usernamePassword  = new UsernamePasswordAuthenticationToken(dto.email(), dto.password());
         Authentication auth = authenticationManager.authenticate(usernamePassword);
         User user = (User) Objects.requireNonNull(auth.getPrincipal());
+
         String token = tokenService.generateToken(user);
-        return new AuthResponseDTO(token, user.getName(), user.getEmail());
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+
+        return new AuthResponseDTO(token, refreshToken.getToken());
     }
 
     public AuthResponseDTO loginWithGoogle(GoogleLoginRequestDTO dto) {
@@ -85,12 +92,32 @@ public class AuthService {
 
 
             String jwt = tokenService.generateToken(user);
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
 
-            return new AuthResponseDTO(jwt, user.getName(), user.getEmail());
+            return new AuthResponseDTO(jwt, refreshToken.getToken());
 
         } catch (Exception e) {
             throw new BusinessException(e.getMessage());
         }
+    }
+
+    public AuthResponseDTO refreshToken(RefreshTokenRequestDTO dto) {
+        RefreshToken oldToken = refreshTokenService.findByToken(dto.refreshToken());
+        refreshTokenService.verifyExpiration(oldToken);
+
+        User user = oldToken.getUser();
+
+        refreshTokenService.delete(oldToken);
+
+        RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getId());
+        String newAccessToken = tokenService.generateToken(user);
+
+        return new AuthResponseDTO(newAccessToken, newRefreshToken.getToken());
+    }
+
+    public UserResponseDTO getCurrentUser() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userMapper.toDTO(user);
     }
 
     private User updateExistingUser(User user, String googleId, String avatarUrl, boolean emailVerified) {

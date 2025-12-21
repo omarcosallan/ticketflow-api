@@ -17,6 +17,11 @@ spring:
     token:
       secret: ${SECURITY_TOKEN_SECRET:secret-jwt-token-key-dev}
       issuer: ${SECURITY_TOKEN_ISSUER:ticketflow-api}
+    jwt:
+      access-token:
+        expiration-hours: 2
+      refresh-token:
+        expiration-seconds: 604800
     oauth2:
       client:
         registration:
