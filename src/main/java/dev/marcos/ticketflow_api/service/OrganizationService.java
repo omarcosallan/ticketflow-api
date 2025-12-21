@@ -1,7 +1,7 @@
 package dev.marcos.ticketflow_api.service;
 
 import dev.marcos.ticketflow_api.dto.organization.OrganizationRequestDTO;
-import dev.marcos.ticketflow_api.dto.organization.OrganizationResponseDTO;
+import dev.marcos.ticketflow_api.dto.organization.OrganizationDTO;
 import dev.marcos.ticketflow_api.entity.Member;
 import dev.marcos.ticketflow_api.entity.Organization;
 import dev.marcos.ticketflow_api.entity.User;
@@ -28,7 +28,7 @@ public class OrganizationService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public OrganizationResponseDTO save(OrganizationRequestDTO dto) {
+    public OrganizationDTO save(OrganizationRequestDTO dto) {
 
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -54,7 +54,7 @@ public class OrganizationService {
         return organizationMapper.toDTO(savedOrg);
     }
 
-    public List<OrganizationResponseDTO> listMyOrganizations() {
+    public List<OrganizationDTO> listMyOrganizations() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UUID userId = user.getId();
 
@@ -65,7 +65,7 @@ public class OrganizationService {
                 .toList();
     }
 
-    public OrganizationResponseDTO findById(UUID orgId) {
+    public OrganizationDTO findById(UUID orgId) {
         Organization org = organizationRepository.findById(orgId)
                 .orElseThrow(() -> new NotFoundException("Organização não encontrada"));
         return organizationMapper.toDTO(org);

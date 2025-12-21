@@ -1,7 +1,7 @@
 package dev.marcos.ticketflow_api.controller;
 
 import dev.marcos.ticketflow_api.dto.organization.OrganizationRequestDTO;
-import dev.marcos.ticketflow_api.dto.organization.OrganizationResponseDTO;
+import dev.marcos.ticketflow_api.dto.organization.OrganizationDTO;
 import dev.marcos.ticketflow_api.service.OrganizationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,18 +21,18 @@ public class OrganizationController {
     private final OrganizationService organizationService;
 
     @PostMapping
-    public ResponseEntity<OrganizationResponseDTO> create(@Valid @RequestBody OrganizationRequestDTO dto) {
+    public ResponseEntity<OrganizationDTO> create(@Valid @RequestBody OrganizationRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(organizationService.save(dto));
     }
 
     @GetMapping
-    public ResponseEntity<List<OrganizationResponseDTO>> listMine() {
+    public ResponseEntity<List<OrganizationDTO>> listMine() {
         return ResponseEntity.ok(organizationService.listMyOrganizations());
     }
 
     @GetMapping("/{orgId}")
     @PreAuthorize("@orgGuard.hasPermission(authentication, #orgId, 'STAFF')")
-    public ResponseEntity<OrganizationResponseDTO> findById(@PathVariable UUID orgId) {
+    public ResponseEntity<OrganizationDTO> findById(@PathVariable UUID orgId) {
         return ResponseEntity.ok(organizationService.findById(orgId));
     }
 }
