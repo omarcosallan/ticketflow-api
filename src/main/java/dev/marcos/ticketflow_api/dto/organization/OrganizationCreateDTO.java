@@ -7,11 +7,11 @@ import jakarta.validation.constraints.Size;
 
 public record OrganizationCreateDTO(
         @NotEmpty(message = "Nome da organização é obrigatório")
-        @Size(min = 6, message = "Nome deve ter no mínimo 3 caracteres")
+        @Size(min = 3, message = "Nome deve ter no mínimo 3 caracteres")
         String name,
 
         @NotEmpty(message = "Slug é obrigatório")
-        @Size(min = 6, message = "Slug deve ter no mínimo 3 caracteres")
+        @Size(min = 3, message = "Slug deve ter no mínimo 3 caracteres")
         String slug,
 
         @DocumentValidator
