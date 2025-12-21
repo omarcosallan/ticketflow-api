@@ -4,6 +4,9 @@ import dev.marcos.ticketflow_api.dto.exception.ProblemDetail;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,6 +17,43 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ProblemDetail> handleAuthenticationException(
+            AuthenticationException ex, HttpServletRequest request) {
+
+        ProblemDetail problem = new ProblemDetail(
+                "Erro de autenticação",
+                ex.getMessage(),
+                HttpStatus.UNAUTHORIZED.value(),
+                getRequestPath(request));
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ProblemDetail> handleBadCredentialsException(HttpServletRequest request) {
+
+        ProblemDetail problem = new ProblemDetail(
+                "Falha na autenticação",
+                "Email ou senha inválidos",
+                HttpStatus.UNAUTHORIZED.value(),
+                getRequestPath(request));
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ProblemDetail> handleAuthorizationDeniedException(HttpServletRequest request) {
+
+        ProblemDetail problem = new ProblemDetail(
+                "Permissão necessária",
+                "Você não tem permissão para acessar este recurso",
+                HttpStatus.FORBIDDEN.value(),
+                request.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ProblemDetail> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest req) {
@@ -68,7 +108,7 @@ public class GlobalExceptionHandler {
         ProblemDetail problem =
                 new ProblemDetail(
                         "Erro no servidor",
-                        "Ocorreu um erro inesperado.",
+                        "Ocorreu um erro inesperado",
                         HttpStatus.INTERNAL_SERVER_ERROR.value(),
                         getRequestPath(request));
 
