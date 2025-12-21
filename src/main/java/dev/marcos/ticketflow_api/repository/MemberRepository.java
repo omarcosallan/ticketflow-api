@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface MemberRepository extends JpaRepository<Member, UUID> {
-    Optional<Member> findByUserEmailAndOrganizationId(String userEmail, UUID orgId);
 
+    boolean existsByUserIdAndOrganizationId(UUID userId, UUID organizationId);
     Optional<Member> findByUserIdAndOrganizationId(UUID userId, UUID orgId);
 }
