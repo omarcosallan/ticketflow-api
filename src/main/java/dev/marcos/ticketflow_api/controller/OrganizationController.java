@@ -1,6 +1,6 @@
 package dev.marcos.ticketflow_api.controller;
 
-import dev.marcos.ticketflow_api.dto.organization.OrganizationRequestDTO;
+import dev.marcos.ticketflow_api.dto.organization.OrganizationCreateDTO;
 import dev.marcos.ticketflow_api.dto.organization.OrganizationDTO;
 import dev.marcos.ticketflow_api.service.OrganizationService;
 import jakarta.validation.Valid;
@@ -21,7 +21,7 @@ public class OrganizationController {
     private final OrganizationService organizationService;
 
     @PostMapping
-    public ResponseEntity<OrganizationDTO> create(@Valid @RequestBody OrganizationRequestDTO dto) {
+    public ResponseEntity<OrganizationDTO> create(@Valid @RequestBody OrganizationCreateDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(organizationService.save(dto));
     }
 

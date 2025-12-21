@@ -1,6 +1,6 @@
 package dev.marcos.ticketflow_api.service;
 
-import dev.marcos.ticketflow_api.dto.organization.OrganizationRequestDTO;
+import dev.marcos.ticketflow_api.dto.organization.OrganizationCreateDTO;
 import dev.marcos.ticketflow_api.dto.organization.OrganizationDTO;
 import dev.marcos.ticketflow_api.entity.Member;
 import dev.marcos.ticketflow_api.entity.Organization;
@@ -28,7 +28,7 @@ public class OrganizationService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public OrganizationDTO save(OrganizationRequestDTO dto) {
+    public OrganizationDTO save(OrganizationCreateDTO dto) {
 
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
