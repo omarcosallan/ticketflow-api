@@ -2,6 +2,7 @@ package dev.marcos.ticketflow_api.service;
 
 import dev.marcos.ticketflow_api.dto.organization.OrganizationCreateDTO;
 import dev.marcos.ticketflow_api.dto.organization.OrganizationDTO;
+import dev.marcos.ticketflow_api.dto.organization.OrganizationUpdateDTO;
 import dev.marcos.ticketflow_api.entity.Member;
 import dev.marcos.ticketflow_api.entity.Organization;
 import dev.marcos.ticketflow_api.entity.User;
@@ -69,5 +70,25 @@ public class OrganizationService {
         Organization org = organizationRepository.findById(orgId)
                 .orElseThrow(() -> new NotFoundException("Organização não encontrada"));
         return organizationMapper.toDTO(org);
+    }
+
+    @Transactional
+    public OrganizationDTO update(UUID orgId, OrganizationUpdateDTO dto) {
+        Organization org = organizationRepository.findById(orgId)
+                .orElseThrow(() -> new NotFoundException("Organização não encontrada"));
+
+        organizationMapper.updateEntityFromDto(dto, org);
+
+        Organization savedOrg = organizationRepository.save(org);
+
+        return organizationMapper.toDTO(savedOrg);
+    }
+
+    @Transactional
+    public void delete(UUID orgId) {
+        Organization org = organizationRepository.findById(orgId)
+                .orElseThrow(() -> new NotFoundException("Organização não encontrada"));
+
+        organizationRepository.delete(org);
     }
 }

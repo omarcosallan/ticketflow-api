@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface OrganizationRepository extends JpaRepository<Organization, UUID> {
+
     boolean existsBySlug(String slug);
 
     @Query("""

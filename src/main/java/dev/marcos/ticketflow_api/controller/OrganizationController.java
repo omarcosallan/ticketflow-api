@@ -2,6 +2,7 @@ package dev.marcos.ticketflow_api.controller;
 
 import dev.marcos.ticketflow_api.dto.organization.OrganizationCreateDTO;
 import dev.marcos.ticketflow_api.dto.organization.OrganizationDTO;
+import dev.marcos.ticketflow_api.dto.organization.OrganizationUpdateDTO;
 import dev.marcos.ticketflow_api.service.OrganizationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,5 +35,18 @@ public class OrganizationController {
     @PreAuthorize("@orgGuard.hasPermission(authentication, #orgId, 'STAFF')")
     public ResponseEntity<OrganizationDTO> findById(@PathVariable UUID orgId) {
         return ResponseEntity.ok(organizationService.findById(orgId));
+    }
+
+    @PutMapping("/{orgId}")
+    @PreAuthorize("@orgGuard.hasPermission(authentication, #orgId, 'OWNER')")
+    public ResponseEntity<OrganizationDTO> update(@Valid @RequestBody OrganizationUpdateDTO dto, @PathVariable UUID orgId) {
+        return ResponseEntity.ok(organizationService.update(orgId, dto));
+    }
+
+    @DeleteMapping("/{orgId}")
+    @PreAuthorize("@orgGuard.hasPermission(authentication, #orgId, 'OWNER')")
+    public ResponseEntity<OrganizationDTO> delete(@PathVariable UUID orgId) {
+        organizationService.delete(orgId);
+        return ResponseEntity.noContent().build();
     }
 }
