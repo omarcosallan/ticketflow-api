@@ -67,9 +67,13 @@ public class OrganizationService {
     }
 
     public OrganizationDTO findById(UUID orgId) {
-        Organization org = organizationRepository.findById(orgId)
-                .orElseThrow(() -> new NotFoundException("Organização não encontrada"));
+        Organization org = findEntityById(orgId);
         return organizationMapper.toDTO(org);
+    }
+
+    public Organization findEntityById(UUID orgId) {
+        return organizationRepository.findById(orgId)
+                .orElseThrow(() -> new NotFoundException("Organização não encontrada"));
     }
 
     @Transactional

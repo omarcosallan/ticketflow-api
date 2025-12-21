@@ -10,8 +10,6 @@ import dev.marcos.ticketflow_api.exception.BusinessException;
 import dev.marcos.ticketflow_api.exception.NotFoundException;
 import dev.marcos.ticketflow_api.mapper.MemberMapper;
 import dev.marcos.ticketflow_api.repository.MemberRepository;
-import dev.marcos.ticketflow_api.repository.OrganizationRepository;
-import dev.marcos.ticketflow_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,17 +22,15 @@ import java.util.UUID;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final UserRepository userRepository;
-    private final OrganizationRepository organizationRepository;
+    private final UserService userService;
+    private final OrganizationService organizationService;
     private final MemberMapper memberMapper;
 
     @Transactional
     public MemberDTO addMember(UUID orgId, MemberCreateDTO dto) {
-        Organization org = organizationRepository.findById(orgId)
-                .orElseThrow(() -> new NotFoundException("Organização não encontrada"));
+        Organization org = organizationService.findEntityById(orgId);
 
-        User userToAdd = userRepository.findByEmail(dto.email())
-                .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
+        User userToAdd = userService.loadUserByUsername(dto.email());
 
         if (memberRepository.existsByUserIdAndOrganizationId(userToAdd.getId(), orgId)) {
             throw new BusinessException("Este usuário já é membro desta organização");
@@ -67,8 +63,7 @@ public class MemberService {
     }
 
     public List<MemberDTO> findAllByOrg(UUID orgId) {
-        Organization org = organizationRepository.findById(orgId)
-                .orElseThrow(() -> new NotFoundException("Organização não encontrada"));
+        Organization org = organizationService.findEntityById(orgId);
 
         return org.getMembers()
                 .stream()
