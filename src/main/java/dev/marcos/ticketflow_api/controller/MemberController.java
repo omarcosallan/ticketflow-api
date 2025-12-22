@@ -1,7 +1,7 @@
 package dev.marcos.ticketflow_api.controller;
 
-import dev.marcos.ticketflow_api.dto.member.MemberCreateDTO;
-import dev.marcos.ticketflow_api.dto.member.MemberDTO;
+import dev.marcos.ticketflow_api.dto.member.AddMemberRequest;
+import dev.marcos.ticketflow_api.dto.member.MemberResponse;
 import dev.marcos.ticketflow_api.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +22,13 @@ public class MemberController {
 
     @GetMapping
     @PreAuthorize("@orgGuard.hasPermission(authentication, #orgId, 'ADMIN')")
-    public ResponseEntity<List<MemberDTO>> findAllByOrg(@PathVariable UUID orgId) {
+    public ResponseEntity<List<MemberResponse>> findAllByOrg(@PathVariable UUID orgId) {
         return ResponseEntity.ok(memberService.findAllByOrg(orgId));
     }
 
     @PostMapping
     @PreAuthorize("@orgGuard.hasPermission(authentication, #orgId, 'ADMIN')")
-    public ResponseEntity<MemberDTO> addMember(@PathVariable UUID orgId, @Valid @RequestBody MemberCreateDTO dto) {
+    public ResponseEntity<MemberResponse> addMember(@PathVariable UUID orgId, @Valid @RequestBody AddMemberRequest dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(memberService.addMember(orgId, dto));
     }
 

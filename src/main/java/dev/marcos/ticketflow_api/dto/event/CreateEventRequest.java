@@ -4,7 +4,10 @@ import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
-public record EventCreateDTO(
+public record CreateEventRequest(
+        @NotBlank(message = "O título do evento é obrigatório")
+        String title,
+
         String description,
 
         @Future(message = "A data deve ser no futuro")

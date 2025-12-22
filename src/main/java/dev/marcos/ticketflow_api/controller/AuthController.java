@@ -1,6 +1,7 @@
 package dev.marcos.ticketflow_api.controller;
 
 import dev.marcos.ticketflow_api.dto.auth.*;
+import dev.marcos.ticketflow_api.dto.user.UserDetailResponse;
 import dev.marcos.ticketflow_api.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,30 +19,30 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDTO> register(@RequestBody @Valid RegisterRequestDTO request) {
-        UserResponseDTO user = authService.register(request);
+    public ResponseEntity<UserDetailResponse> register(@RequestBody @Valid RegisterUserRequest request) {
+        UserDetailResponse user = authService.register(request);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(user.id()).toUri();
         return ResponseEntity.created(uri).body(user);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid LoginRequestDTO request) {
+    public ResponseEntity<TokenResponse> login(@RequestBody @Valid LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
 
     @PostMapping("/google")
-    public ResponseEntity<AuthResponseDTO> googleLogin(@RequestBody GoogleLoginRequestDTO dto) {
-        AuthResponseDTO response = authService.loginWithGoogle(dto);
+    public ResponseEntity<TokenResponse> googleLogin(@RequestBody GoogleLoginRequest dto) {
+        TokenResponse response = authService.loginWithGoogle(dto);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponseDTO> me() {
+    public ResponseEntity<UserDetailResponse> me() {
         return ResponseEntity.ok(authService.getCurrentUser());
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponseDTO> refreshToken(@Valid @RequestBody RefreshTokenRequestDTO request) {
+    public ResponseEntity<TokenResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
         return ResponseEntity.ok(authService.refreshToken(request));
     }
 }

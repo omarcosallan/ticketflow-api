@@ -38,9 +38,10 @@ public class RefreshTokenService {
                 .orElseThrow(() -> new BusinessException("Refresh token não encontrado"));
     }
 
+    @Transactional
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
-            refreshTokenRepository.delete(token);
+            delete(token);
             throw new BusinessException("Refresh token expirado. Faça login novamente");
         }
         return token;

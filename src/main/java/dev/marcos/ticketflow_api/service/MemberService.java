@@ -1,7 +1,7 @@
 package dev.marcos.ticketflow_api.service;
 
-import dev.marcos.ticketflow_api.dto.member.MemberCreateDTO;
-import dev.marcos.ticketflow_api.dto.member.MemberDTO;
+import dev.marcos.ticketflow_api.dto.member.AddMemberRequest;
+import dev.marcos.ticketflow_api.dto.member.MemberResponse;
 import dev.marcos.ticketflow_api.entity.Member;
 import dev.marcos.ticketflow_api.entity.Organization;
 import dev.marcos.ticketflow_api.entity.User;
@@ -27,7 +27,7 @@ public class MemberService {
     private final MemberMapper memberMapper;
 
     @Transactional
-    public MemberDTO addMember(UUID orgId, MemberCreateDTO dto) {
+    public MemberResponse addMember(UUID orgId, AddMemberRequest dto) {
         Organization org = organizationService.findEntityById(orgId);
 
         User userToAdd = userService.loadUserByUsername(dto.email());
@@ -62,7 +62,7 @@ public class MemberService {
         memberRepository.delete(member);
     }
 
-    public List<MemberDTO> findAllByOrg(UUID orgId) {
+    public List<MemberResponse> findAllByOrg(UUID orgId) {
         Organization org = organizationService.findEntityById(orgId);
 
         return org.getMembers()

@@ -5,6 +5,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import dev.marcos.ticketflow_api.dto.auth.*;
+import dev.marcos.ticketflow_api.dto.user.UserDetailResponse;
 import dev.marcos.ticketflow_api.entity.RefreshToken;
 import dev.marcos.ticketflow_api.entity.User;
 import dev.marcos.ticketflow_api.exception.BusinessException;
@@ -21,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +37,7 @@ public class AuthService {
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String googleClientId;
 
-    public UserResponseDTO register(RegisterRequestDTO dto) {
+    public UserDetailResponse register(RegisterUserRequest dto) {
 
         if (userRepository.existsByEmail(dto.email())) {
             throw new BusinessException("Este email já está em uso");
@@ -53,10 +53,10 @@ public class AuthService {
 
         User savedUser = userRepository.save(newUser);
 
-        return userMapper.toDTO(savedUser);
+        return userMapper.toUserDetailDTO(savedUser);
     }
 
-    public AuthResponseDTO login(LoginRequestDTO dto) {
+    public TokenResponse login(LoginRequest dto) {
         UsernamePasswordAuthenticationToken usernamePassword  = new UsernamePasswordAuthenticationToken(dto.email(), dto.password());
         Authentication auth = authenticationManager.authenticate(usernamePassword);
         User user = (User) Objects.requireNonNull(auth.getPrincipal());
@@ -64,10 +64,10 @@ public class AuthService {
         String token = tokenService.generateToken(user);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
 
-        return new AuthResponseDTO(token, refreshToken.getToken());
+        return new TokenResponse(token, refreshToken.getToken());
     }
 
-    public AuthResponseDTO loginWithGoogle(GoogleLoginRequestDTO dto) {
+    public TokenResponse loginWithGoogle(GoogleLoginRequest dto) {
         try {
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
                     .setAudience(Collections.singletonList(googleClientId))
@@ -94,14 +94,14 @@ public class AuthService {
             String jwt = tokenService.generateToken(user);
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
 
-            return new AuthResponseDTO(jwt, refreshToken.getToken());
+            return new TokenResponse(jwt, refreshToken.getToken());
 
         } catch (Exception e) {
             throw new BusinessException(e.getMessage());
         }
     }
 
-    public AuthResponseDTO refreshToken(RefreshTokenRequestDTO dto) {
+    public TokenResponse refreshToken(RefreshTokenRequest dto) {
         RefreshToken oldToken = refreshTokenService.findByToken(dto.refreshToken());
         refreshTokenService.verifyExpiration(oldToken);
 
@@ -112,12 +112,12 @@ public class AuthService {
         RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getId());
         String newAccessToken = tokenService.generateToken(user);
 
-        return new AuthResponseDTO(newAccessToken, newRefreshToken.getToken());
+        return new TokenResponse(newAccessToken, newRefreshToken.getToken());
     }
 
-    public UserResponseDTO getCurrentUser() {
+    public UserDetailResponse getCurrentUser() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userMapper.toDTO(user);
+        return userMapper.toUserDetailDTO(user);
     }
 
     private User updateExistingUser(User user, String googleId, String avatarUrl, boolean emailVerified) {

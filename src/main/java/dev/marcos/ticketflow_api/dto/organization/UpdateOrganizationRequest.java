@@ -4,7 +4,7 @@ import dev.marcos.ticketflow_api.validator.DocumentValidator;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 
-public record OrganizationUpdateDTO(
+public record UpdateOrganizationRequest(
         @Size(min = 3, message = "Nome deve ter no mínimo 3 caracteres")
         String name,
 

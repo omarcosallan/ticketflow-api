@@ -2,7 +2,6 @@ package dev.marcos.ticketflow_api.dto.exception;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;

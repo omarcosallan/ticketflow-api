@@ -1,8 +1,9 @@
 package dev.marcos.ticketflow_api.service;
 
-import dev.marcos.ticketflow_api.dto.organization.OrganizationCreateDTO;
-import dev.marcos.ticketflow_api.dto.organization.OrganizationDTO;
-import dev.marcos.ticketflow_api.dto.organization.OrganizationUpdateDTO;
+import dev.marcos.ticketflow_api.dto.organization.CreateOrganizationRequest;
+import dev.marcos.ticketflow_api.dto.organization.OrganizationDetailResponse;
+import dev.marcos.ticketflow_api.dto.organization.OrganizationSummaryResponse;
+import dev.marcos.ticketflow_api.dto.organization.UpdateOrganizationRequest;
 import dev.marcos.ticketflow_api.entity.Member;
 import dev.marcos.ticketflow_api.entity.Organization;
 import dev.marcos.ticketflow_api.entity.User;
@@ -29,7 +30,7 @@ public class OrganizationService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public OrganizationDTO save(OrganizationCreateDTO dto) {
+    public OrganizationDetailResponse save(CreateOrganizationRequest dto) {
 
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -52,23 +53,23 @@ public class OrganizationService {
 
         memberRepository.save(member);
 
-        return organizationMapper.toDTO(savedOrg);
+        return organizationMapper.toOrgDetailDTO(savedOrg);
     }
 
-    public List<OrganizationDTO> listMyOrganizations() {
+    public List<OrganizationSummaryResponse> listMyOrganizations() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UUID userId = user.getId();
 
         List<Organization> organizations = organizationRepository.findAllByUserId(userId);
 
         return organizations.stream()
-                .map(organizationMapper::toDTO)
+                .map(organizationMapper::toOrgSummaryDTO)
                 .toList();
     }
 
-    public OrganizationDTO findById(UUID orgId) {
+    public OrganizationDetailResponse findById(UUID orgId) {
         Organization org = findEntityById(orgId);
-        return organizationMapper.toDTO(org);
+        return organizationMapper.toOrgDetailDTO(org);
     }
 
     public Organization findEntityById(UUID orgId) {
@@ -77,7 +78,7 @@ public class OrganizationService {
     }
 
     @Transactional
-    public OrganizationDTO update(UUID orgId, OrganizationUpdateDTO dto) {
+    public OrganizationDetailResponse update(UUID orgId, UpdateOrganizationRequest dto) {
         Organization org = organizationRepository.findById(orgId)
                 .orElseThrow(() -> new NotFoundException("Organização não encontrada"));
 
@@ -85,7 +86,7 @@ public class OrganizationService {
 
         Organization savedOrg = organizationRepository.save(org);
 
-        return organizationMapper.toDTO(savedOrg);
+        return organizationMapper.toOrgDetailDTO(savedOrg);
     }
 
     @Transactional

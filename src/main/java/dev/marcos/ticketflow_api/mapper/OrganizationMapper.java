@@ -1,7 +1,8 @@
 package dev.marcos.ticketflow_api.mapper;
 
-import dev.marcos.ticketflow_api.dto.organization.OrganizationDTO;
-import dev.marcos.ticketflow_api.dto.organization.OrganizationUpdateDTO;
+import dev.marcos.ticketflow_api.dto.organization.OrganizationDetailResponse;
+import dev.marcos.ticketflow_api.dto.organization.OrganizationSummaryResponse;
+import dev.marcos.ticketflow_api.dto.organization.UpdateOrganizationRequest;
 import dev.marcos.ticketflow_api.entity.Organization;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -13,6 +14,9 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 )
 public interface OrganizationMapper {
 
-    OrganizationDTO toDTO(Organization organization);
-    void updateEntityFromDto(OrganizationUpdateDTO dto, @MappingTarget Organization entity);
+    OrganizationSummaryResponse toOrgSummaryDTO(Organization organization);
+
+    OrganizationDetailResponse toOrgDetailDTO(Organization organization);
+
+    void updateEntityFromDto(UpdateOrganizationRequest dto, @MappingTarget Organization entity);
 }

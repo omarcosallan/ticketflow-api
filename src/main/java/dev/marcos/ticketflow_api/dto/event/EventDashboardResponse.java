@@ -4,7 +4,7 @@ import dev.marcos.ticketflow_api.entity.enums.EventStatus;
 
 import java.math.BigDecimal;
 
-public record EventDashboardDTO(
+public record EventDashboardResponse(
         String eventName,
         EventStatus status,
         long ticketsSold,

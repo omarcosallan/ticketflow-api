@@ -2,7 +2,7 @@ package dev.marcos.ticketflow_api.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record RefreshTokenRequestDTO(
+public record RefreshTokenRequest(
         @NotBlank String refreshToken
 ) {
 }

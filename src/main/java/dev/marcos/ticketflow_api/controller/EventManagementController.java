@@ -1,9 +1,6 @@
 package dev.marcos.ticketflow_api.controller;
 
-import dev.marcos.ticketflow_api.dto.event.EventCreateDTO;
-import dev.marcos.ticketflow_api.dto.event.EventDTO;
-import dev.marcos.ticketflow_api.dto.event.EventDashboardDTO;
-import dev.marcos.ticketflow_api.dto.event.EventStatusRequestDTO;
+import dev.marcos.ticketflow_api.dto.event.*;
 import dev.marcos.ticketflow_api.service.EventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,31 +21,31 @@ public class EventManagementController {
 
     @PostMapping
     @PreAuthorize("@orgGuard.hasPermission(authentication, #orgId, 'ADMIN')")
-    public ResponseEntity<EventDTO> save(@PathVariable UUID orgId, @Valid @RequestBody EventCreateDTO dto) {
+    public ResponseEntity<EventDetailResponse> save(@PathVariable UUID orgId, @Valid @RequestBody CreateEventRequest dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.save(orgId, dto));
     }
 
     @GetMapping
     @PreAuthorize("@orgGuard.hasPermission(authentication, #orgId, 'STAFF')")
-    public ResponseEntity<List<EventDTO>> listAll(@PathVariable UUID orgId) {
+    public ResponseEntity<List<EventSummaryResponse>> listAll(@PathVariable UUID orgId) {
         return ResponseEntity.ok(eventService.listByOrganization(orgId));
     }
 
     @PutMapping("/{eventId}")
     @PreAuthorize("@orgGuard.hasPermission(authentication, #orgId, 'ADMIN')")
-    public ResponseEntity<EventDTO> update(@PathVariable UUID orgId, @PathVariable UUID eventId, @Valid @RequestBody EventCreateDTO dto) {
+    public ResponseEntity<EventDetailResponse> update(@PathVariable UUID orgId, @PathVariable UUID eventId, @Valid @RequestBody UpdateEventRequest dto) {
         return ResponseEntity.ok(eventService.update(orgId, eventId, dto));
     }
 
     @PatchMapping("/{eventId}/status")
     @PreAuthorize("@orgGuard.hasPermission(authentication, #orgId, 'ADMIN')")
-    public ResponseEntity<EventDTO> updateStatus(@PathVariable UUID orgId, @PathVariable UUID eventId, @Valid @RequestBody EventStatusRequestDTO dto) {
+    public ResponseEntity<EventDetailResponse> updateStatus(@PathVariable UUID orgId, @PathVariable UUID eventId, @Valid @RequestBody UpdateEventStatusRequest dto) {
         return ResponseEntity.ok(eventService.updateStatus(orgId, eventId, dto));
     }
 
     @GetMapping("/{eventId}/dashboard")
     @PreAuthorize("@orgGuard.hasPermission(authentication, #orgId, 'ADMIN')")
-    public ResponseEntity<EventDashboardDTO> dashboard(@PathVariable UUID orgId, @PathVariable UUID eventId) {
+    public ResponseEntity<EventDashboardResponse> dashboard(@PathVariable UUID orgId, @PathVariable UUID eventId) {
         return ResponseEntity.ok(eventService.dashboard(orgId, eventId));
     }
 }

@@ -1,9 +1,6 @@
 package dev.marcos.ticketflow_api.service;
 
-import dev.marcos.ticketflow_api.dto.event.EventCreateDTO;
-import dev.marcos.ticketflow_api.dto.event.EventDTO;
-import dev.marcos.ticketflow_api.dto.event.EventDashboardDTO;
-import dev.marcos.ticketflow_api.dto.event.EventStatusRequestDTO;
+import dev.marcos.ticketflow_api.dto.event.*;
 import dev.marcos.ticketflow_api.entity.Event;
 import dev.marcos.ticketflow_api.entity.Organization;
 import dev.marcos.ticketflow_api.entity.TicketType;
@@ -35,7 +32,7 @@ public class EventService {
     private final EventMapper eventMapper;
 
     @Transactional
-    public EventDTO save(UUID orgId, EventCreateDTO dto) {
+    public EventDetailResponse save(UUID orgId, CreateEventRequest dto) {
 
         if (!dto.startDateTime().isBefore(dto.endDateTime())) {
             throw new BusinessException("A data de início deve ser anterior à data de fim.");
@@ -60,37 +57,37 @@ public class EventService {
 
         Event savedEvent = eventRepository.save(event);
 
-        return eventMapper.toDTO(savedEvent);
+        return eventMapper.toEventDetailDTO(savedEvent);
     }
 
-    public List<EventDTO> listByOrganization(UUID orgId) {
+    public List<EventSummaryResponse> listByOrganization(UUID orgId) {
         return eventRepository.findAllByOrganizationId(orgId).stream()
-                .map(eventMapper::toDTO)
+                .map(eventMapper::toEventSummaryDTO)
                 .toList();
     }
 
-    public List<EventDTO> findAll(int page,
-                                  int size,
-                                  String title,
-                                  EventStatus status,
-                                  LocalDateTime startDate,
-                                  LocalDateTime endDate) {
+    public List<EventSummaryResponse> findAll(int page,
+                                       int size,
+                                       String title,
+                                       EventStatus status,
+                                       LocalDateTime startDate,
+                                       LocalDateTime endDate) {
 
         Specification<Event> specs = create(title, status, startDate, endDate);
 
         Pageable pageable = PageRequest.of(page, size);
 
-        return eventRepository.findAll(specs, pageable).stream().map(eventMapper::toDTO).toList();
+        return eventRepository.findAll(specs, pageable).stream().map(eventMapper::toEventSummaryDTO).toList();
     }
 
-    public EventDTO findById(UUID eventId) {
+    public EventDetailResponse findById(UUID eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Evento não encontrado"));
-        return eventMapper.toDTO(event);
+        return eventMapper.toEventDetailDTO(event);
     }
 
     @Transactional
-    public EventDTO update(UUID orgId, UUID eventId, EventCreateDTO dto) {
+    public EventDetailResponse update(UUID orgId, UUID eventId, UpdateEventRequest dto) {
         if (!dto.startDateTime().isBefore(dto.endDateTime())) {
             throw new BusinessException("A data de início deve ser anterior à data de fim.");
         }
@@ -110,11 +107,11 @@ public class EventService {
 
         eventMapper.updateEntityFromDto(dto, event);
 
-        return eventMapper.toDTO(eventRepository.save(event));
+        return eventMapper.toEventDetailDTO(eventRepository.save(event));
     }
 
     @Transactional
-    public EventDTO updateStatus(UUID orgId, UUID eventId, EventStatusRequestDTO dto) {
+    public EventDetailResponse updateStatus(UUID orgId, UUID eventId, UpdateEventStatusRequest dto) {
         Event event = findEntityById(orgId, eventId);
 
         EventStatus newStatus = dto.status();
@@ -127,10 +124,10 @@ public class EventService {
 
         eventRepository.save(event);
 
-        return eventMapper.toDTO(event);
+        return eventMapper.toEventDetailDTO(event);
     }
 
-    public EventDashboardDTO dashboard(UUID orgId, UUID eventId) {
+    public EventDashboardResponse dashboard(UUID orgId, UUID eventId) {
         Event event = findEntityById(orgId, eventId);
 
         List<TicketType> ticketTypes = event.getTicketTypes() != null ? event.getTicketTypes() : List.<TicketType>of();
@@ -147,7 +144,7 @@ public class EventService {
                 .map(t -> t.getPrice().multiply(BigDecimal.valueOf(t.getSoldQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return new EventDashboardDTO(
+        return new EventDashboardResponse(
                 event.getTitle(),
                 event.getStatus(),
                 ticketSold,
