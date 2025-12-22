@@ -12,14 +12,19 @@ import dev.marcos.ticketflow_api.exception.BusinessException;
 import dev.marcos.ticketflow_api.exception.NotFoundException;
 import dev.marcos.ticketflow_api.mapper.EventMapper;
 import dev.marcos.ticketflow_api.repository.EventRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import static dev.marcos.ticketflow_api.repository.specs.EventSpec.*;
 
 @Service
 @RequiredArgsConstructor
@@ -64,6 +69,26 @@ public class EventService {
                 .toList();
     }
 
+    public List<EventDTO> findAll(int page,
+                                  int size,
+                                  String title,
+                                  EventStatus status,
+                                  LocalDateTime startDate,
+                                  LocalDateTime endDate) {
+
+        Specification<Event> specs = create(title, status, startDate, endDate);
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        return eventRepository.findAll(specs, pageable).stream().map(eventMapper::toDTO).toList();
+    }
+
+    public EventDTO findById(UUID eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Evento não encontrado"));
+        return eventMapper.toDTO(event);
+    }
+
     @Transactional
     public EventDTO update(UUID orgId, UUID eventId, EventCreateDTO dto) {
         if (!dto.startDateTime().isBefore(dto.endDateTime())) {
@@ -89,7 +114,7 @@ public class EventService {
     }
 
     @Transactional
-    public EventDTO updateStatus(UUID orgId, UUID eventId, @Valid EventStatusRequestDTO dto) {
+    public EventDTO updateStatus(UUID orgId, UUID eventId, EventStatusRequestDTO dto) {
         Event event = findEntityById(orgId, eventId);
 
         EventStatus newStatus = dto.status();
