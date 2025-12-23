@@ -152,7 +152,7 @@ public class EventService {
                 revenue);
     }
 
-    private Event findEntityById(UUID orgId, UUID eventId) {
+    public Event findEntityById(UUID orgId, UUID eventId) {
         return eventRepository.findByIdAndOrganizationId(eventId, orgId)
                 .orElseThrow(() -> new NotFoundException("Evento não encontrado nesta organização"));
     }

@@ -1,9 +1,11 @@
 package dev.marcos.ticketflow_api.dto.event;
 
 import dev.marcos.ticketflow_api.dto.organization.OrganizationSummaryResponse;
+import dev.marcos.ticketflow_api.dto.ticketType.TicketTypeDetailResponse;
 import dev.marcos.ticketflow_api.entity.enums.EventStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public record EventDetailResponse(
@@ -15,6 +17,7 @@ public record EventDetailResponse(
         String location,
         String bannerUrl,
         EventStatus status,
-        OrganizationSummaryResponse organization
+        OrganizationSummaryResponse organization,
+        List<TicketTypeDetailResponse> tickets
 ) {
 }
