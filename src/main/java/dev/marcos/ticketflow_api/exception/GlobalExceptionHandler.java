@@ -1,5 +1,8 @@
 package dev.marcos.ticketflow_api.exception;
 
+import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
 import dev.marcos.ticketflow_api.dto.exception.ProblemDetail;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -101,6 +104,23 @@ public class GlobalExceptionHandler {
                         getRequestPath(request));
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
+    }
+
+    @ExceptionHandler({
+            SignatureVerificationException.class,
+            JWTVerificationException.class,
+            JWTCreationException.class
+    })
+    public ResponseEntity<ProblemDetail> handleTokenException(HttpServletRequest request) {
+
+        ProblemDetail problem = new ProblemDetail(
+                "Token inválido",
+                "As informações de autenticação necessárias são inválidas. O token é inválido ou expirou",
+                HttpStatus.UNAUTHORIZED.value(),
+                getRequestPath(request)
+        );
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
     }
 
     @ExceptionHandler(Exception.class)
