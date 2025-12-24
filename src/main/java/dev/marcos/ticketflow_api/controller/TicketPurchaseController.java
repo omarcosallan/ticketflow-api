@@ -1,7 +1,7 @@
 package dev.marcos.ticketflow_api.controller;
 
 import dev.marcos.ticketflow_api.dto.ticket.PurchaseRequest;
-import dev.marcos.ticketflow_api.dto.ticket.TicketResponse;
+import dev.marcos.ticketflow_api.dto.ticket.TicketGroupResponse;
 import dev.marcos.ticketflow_api.entity.User;
 import dev.marcos.ticketflow_api.service.TicketProducerService;
 import dev.marcos.ticketflow_api.service.TicketService;
@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/tickets")
@@ -33,7 +34,12 @@ public class TicketPurchaseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TicketResponse>> findAll() {
-        return ResponseEntity.ok(ticketService.findAll());
+    public ResponseEntity<List<TicketGroupResponse>> findAll(
+            @AuthenticationPrincipal User user,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false) UUID eventId
+    ) {
+        return ResponseEntity.ok(ticketService.findAll(user, page, size, eventId));
     }
 }
