@@ -81,8 +81,7 @@ public class EventService {
     }
 
     public EventDetailResponse findById(UUID eventId) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Evento não encontrado"));
+        Event event = findEntityById(eventId);
         return eventMapper.toEventDetailDTO(event);
     }
 
@@ -150,6 +149,11 @@ public class EventService {
                 ticketSold,
                 ticketsAvailable,
                 revenue);
+    }
+
+    public Event findEntityById(UUID eventId) {
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Evento não encontrado"));
     }
 
     public Event findEntityById(UUID orgId, UUID eventId) {

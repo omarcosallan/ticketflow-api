@@ -1,7 +1,7 @@
 package dev.marcos.ticketflow_api.service;
 
 import dev.marcos.ticketflow_api.dto.ticketType.CreateTicketTypeRequest;
-import dev.marcos.ticketflow_api.dto.ticketType.TicketTypeDetailResponse;
+import dev.marcos.ticketflow_api.dto.ticketType.TicketTypeAdminResponse;
 import dev.marcos.ticketflow_api.entity.Event;
 import dev.marcos.ticketflow_api.entity.TicketType;
 import dev.marcos.ticketflow_api.mapper.TicketTypeMapper;
@@ -21,7 +21,7 @@ public class TicketTypeService {
     private final TicketTypeMapper mapper;
 
     @Transactional
-    public TicketTypeDetailResponse create(UUID orgId, UUID eventId, CreateTicketTypeRequest dto) {
+    public TicketTypeAdminResponse create(UUID orgId, UUID eventId, CreateTicketTypeRequest dto) {
         Event event = eventService.findEntityById(orgId, eventId);
 
         TicketType ticketType = new TicketType();
@@ -33,6 +33,6 @@ public class TicketTypeService {
 
         TicketType ticketTypeSaved = ticketTypeRepository.save(ticketType);
 
-        return mapper.toTicketTypeDetailDTO(ticketTypeSaved);
+        return mapper.toAdminDTO(ticketTypeSaved);
     }
 }

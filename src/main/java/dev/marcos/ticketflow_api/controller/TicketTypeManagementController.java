@@ -1,7 +1,7 @@
 package dev.marcos.ticketflow_api.controller;
 
 import dev.marcos.ticketflow_api.dto.ticketType.CreateTicketTypeRequest;
-import dev.marcos.ticketflow_api.dto.ticketType.TicketTypeDetailResponse;
+import dev.marcos.ticketflow_api.dto.ticketType.TicketTypeAdminResponse;
 import dev.marcos.ticketflow_api.service.TicketTypeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class TicketTypeManagementController {
 
     @PostMapping
     @PreAuthorize("@orgGuard.hasPermission(authentication, #orgId, 'ADMIN')")
-    public ResponseEntity<TicketTypeDetailResponse> create(
+    public ResponseEntity<TicketTypeAdminResponse> create(
             @PathVariable UUID orgId,
             @PathVariable UUID eventId,
             @RequestBody @Valid CreateTicketTypeRequest dto) {
