@@ -3,12 +3,13 @@ package dev.marcos.ticketflow_api.service;
 import dev.marcos.ticketflow_api.dto.event.*;
 import dev.marcos.ticketflow_api.entity.Event;
 import dev.marcos.ticketflow_api.entity.Organization;
-import dev.marcos.ticketflow_api.entity.TicketType;
 import dev.marcos.ticketflow_api.entity.enums.EventStatus;
 import dev.marcos.ticketflow_api.exception.BusinessException;
 import dev.marcos.ticketflow_api.exception.NotFoundException;
 import dev.marcos.ticketflow_api.mapper.EventMapper;
 import dev.marcos.ticketflow_api.repository.EventRepository;
+import dev.marcos.ticketflow_api.repository.TicketTypeRepository;
+import dev.marcos.ticketflow_api.repository.projections.EventStats;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,7 @@ public class EventService {
     private final EventRepository eventRepository;
     private final OrganizationService organizationService;
     private final EventMapper eventMapper;
+    private final TicketTypeRepository ticketTypeRepository;
 
     @Transactional
     public EventDetailResponse save(UUID orgId, CreateEventRequest dto) {
@@ -127,21 +129,14 @@ public class EventService {
     }
 
     public EventDashboardResponse dashboard(UUID orgId, UUID eventId) {
+
         Event event = findEntityById(orgId, eventId);
 
-        List<TicketType> ticketTypes = event.getTicketTypes() != null ? event.getTicketTypes() : List.<TicketType>of();
+        EventStats eventStats = ticketTypeRepository.findStatsByEventId(eventId);
 
-        long ticketSold = ticketTypes.stream()
-                .mapToLong(TicketType::getSoldQuantity)
-                .sum();
-
-        long ticketsAvailable = ticketTypes.stream()
-                .mapToLong(t -> t.getTotalQuantity() - t.getSoldQuantity())
-                .sum();
-
-        BigDecimal revenue = ticketTypes.stream()
-                .map(t -> t.getPrice().multiply(BigDecimal.valueOf(t.getSoldQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        long ticketSold = eventStats.getSold();
+        long ticketsAvailable = eventStats.getAvailable();
+        BigDecimal revenue = eventStats.getRevenue();
 
         return new EventDashboardResponse(
                 event.getTitle(),

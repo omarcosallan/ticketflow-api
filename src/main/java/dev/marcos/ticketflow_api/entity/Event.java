@@ -45,10 +45,10 @@ public class Event {
     @Enumerated(EnumType.STRING)
     private EventStatus status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
 
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "event", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private final List<TicketType> ticketTypes = new ArrayList<>();
 }

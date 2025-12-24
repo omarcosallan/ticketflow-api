@@ -1,6 +1,11 @@
 package dev.marcos.ticketflow_api.repository;
 
 import dev.marcos.ticketflow_api.entity.Event;
+import lombok.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +17,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface EventRepository extends JpaRepository<Event, UUID>, JpaSpecificationExecutor<Event> {
+
+    @Override
+    @NonNull
+    @EntityGraph(attributePaths = { "ticketTypes" })
+    Page<Event> findAll(Specification<Event> spec, @NonNull Pageable pageable);
 
     List<Event> findAllByOrganizationId(UUID orgId);
 

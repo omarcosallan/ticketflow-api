@@ -53,10 +53,10 @@ public class User extends Auditable implements UserDetails {
     @Column(name = "email_verified", nullable = false)
     private Boolean emailVerified = false;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private final List<Member> memberships = new ArrayList<>();
 
-    @OneToMany(mappedBy = "customer")
+    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)
     private List<Ticket> tickets;
 
     @Override

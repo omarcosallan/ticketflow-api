@@ -33,7 +33,7 @@ public class TicketType {
     @Column(name = "sold_quantity", nullable = false)
     private Integer soldQuantity = 0;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 }
