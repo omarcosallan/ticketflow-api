@@ -3,6 +3,7 @@ package dev.marcos.ticketflow_api.service;
 import dev.marcos.ticketflow_api.dto.event.*;
 import dev.marcos.ticketflow_api.entity.Event;
 import dev.marcos.ticketflow_api.entity.Organization;
+import dev.marcos.ticketflow_api.entity.User;
 import dev.marcos.ticketflow_api.entity.enums.EventStatus;
 import dev.marcos.ticketflow_api.exception.BusinessException;
 import dev.marcos.ticketflow_api.exception.NotFoundException;
@@ -80,6 +81,10 @@ public class EventService {
         Pageable pageable = PageRequest.of(page, size);
 
         return eventRepository.findAll(specs, pageable).stream().map(eventMapper::toEventSummaryDTO).toList();
+    }
+
+    public List<EventSummaryResponse> findAllPurchased(User user) {
+        return eventRepository.findAllPurchasedByUserId(user.getId()).stream().map(eventMapper::toEventSummaryDTO).toList();
     }
 
     public EventDetailResponse findById(UUID eventId) {

@@ -2,11 +2,13 @@ package dev.marcos.ticketflow_api.controller;
 
 import dev.marcos.ticketflow_api.dto.event.EventDetailResponse;
 import dev.marcos.ticketflow_api.dto.event.EventSummaryResponse;
+import dev.marcos.ticketflow_api.entity.User;
 import dev.marcos.ticketflow_api.entity.enums.EventStatus;
 import dev.marcos.ticketflow_api.service.EventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -33,5 +35,10 @@ public class EventStoreController {
     @GetMapping("/{eventId}")
     public ResponseEntity<EventDetailResponse> findById(@PathVariable UUID eventId) {
         return ResponseEntity.ok(eventService.findById(eventId));
+    }
+
+    @GetMapping("/purchased")
+    public ResponseEntity<List<EventSummaryResponse>> findAllPurchased(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(eventService.findAllPurchased(user));
     }
 }

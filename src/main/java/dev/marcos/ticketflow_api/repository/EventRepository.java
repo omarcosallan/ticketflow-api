@@ -39,4 +39,12 @@ public interface EventRepository extends JpaRepository<Event, UUID>, JpaSpecific
             @Param("startDateTime") LocalDateTime startDateTime,
             @Param("endDateTime") LocalDateTime endDateTime
     );
+
+    @Query("""
+            SELECT DISTINCT e
+            FROM Event e
+            JOIN Ticket t ON t.event = e
+            WHERE t.customer.id = :userId
+            """)
+    List<Event> findAllPurchasedByUserId(@Param("userId") UUID userId);
 }
