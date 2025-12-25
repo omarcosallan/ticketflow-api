@@ -11,6 +11,7 @@ import dev.marcos.ticketflow_api.exception.NotFoundException;
 import dev.marcos.ticketflow_api.mapper.MemberMapper;
 import dev.marcos.ticketflow_api.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +31,7 @@ public class MemberService {
     public MemberResponse addMember(UUID orgId, AddMemberRequest dto) {
         Organization org = organizationService.findEntityById(orgId);
 
-        User userToAdd = userService.loadUserByUsername(dto.email());
+        User userToAdd = userService.findByEmail(dto.email());
 
         if (memberRepository.existsByUserIdAndOrganizationId(userToAdd.getId(), orgId)) {
             throw new BusinessException("Este usuário já é membro desta organização");
@@ -62,10 +63,9 @@ public class MemberService {
         memberRepository.delete(member);
     }
 
+    @Cacheable(value = "members", key = "#orgId")
     public List<MemberResponse> findAllByOrg(UUID orgId) {
-        Organization org = organizationService.findEntityById(orgId);
-
-        return org.getMembers()
+        return memberRepository.findAllByOrganizationId(orgId)
                 .stream()
                 .map(memberMapper::toDTO)
                 .toList();

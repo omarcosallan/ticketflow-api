@@ -12,6 +12,8 @@ import dev.marcos.ticketflow_api.repository.EventRepository;
 import dev.marcos.ticketflow_api.repository.TicketTypeRepository;
 import dev.marcos.ticketflow_api.repository.projections.EventStats;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -63,12 +65,14 @@ public class EventService {
         return eventMapper.toEventDetailDTO(savedEvent);
     }
 
+    @Cacheable(value = "events", key = "#orgId")
     public List<EventSummaryResponse> listByOrganization(UUID orgId) {
         return eventRepository.findAllByOrganizationId(orgId).stream()
                 .map(eventMapper::toEventSummaryDTO)
                 .toList();
     }
 
+    @Cacheable(value = "events", key = "#page + '_' + #size + '_' + #title + '_' + #status + '_' + #startDate + '_' + #endDate")
     public List<EventSummaryResponse> findAll(int page,
                                        int size,
                                        String title,
@@ -83,16 +87,20 @@ public class EventService {
         return eventRepository.findAll(specs, pageable).stream().map(eventMapper::toEventSummaryDTO).toList();
     }
 
+
+    @Cacheable(value = "events", key = "#user.id")
     public List<EventSummaryResponse> findAllPurchased(User user) {
         return eventRepository.findAllPurchasedByUserId(user.getId()).stream().map(eventMapper::toEventSummaryDTO).toList();
     }
 
+    @Cacheable(value = "event", key = "#eventId")
     public EventDetailResponse findById(UUID eventId) {
         Event event = findEntityById(eventId);
         return eventMapper.toEventDetailDTO(event);
     }
 
     @Transactional
+    @CachePut(cacheNames = "event", key = "#eventId")
     public EventDetailResponse update(UUID orgId, UUID eventId, UpdateEventRequest dto) {
         if (!dto.startDateTime().isBefore(dto.endDateTime())) {
             throw new BusinessException("A data de início deve ser anterior à data de fim.");
@@ -117,6 +125,7 @@ public class EventService {
     }
 
     @Transactional
+    @CachePut(cacheNames = "event", key = "#eventId")
     public EventDetailResponse updateStatus(UUID orgId, UUID eventId, UpdateEventStatusRequest dto) {
         Event event = findEntityById(orgId, eventId);
 

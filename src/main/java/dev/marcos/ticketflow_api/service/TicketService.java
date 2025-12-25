@@ -9,6 +9,7 @@ import dev.marcos.ticketflow_api.mapper.EventMapper;
 import dev.marcos.ticketflow_api.mapper.TicketMapper;
 import dev.marcos.ticketflow_api.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -29,6 +30,7 @@ public class TicketService {
     private final TicketMapper mapper;
     private final EventMapper eventMapper;
 
+    @Cacheable(value = "tickets_group", key = "#user.id + '_' + #page + '_' + #size + '_' + #eventId")
     public List<TicketGroupResponse> findAll(User user, int page, int size, UUID eventId) {
 
         Pageable pageable = PageRequest.of(page, size);

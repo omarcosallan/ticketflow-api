@@ -14,6 +14,9 @@ import dev.marcos.ticketflow_api.mapper.OrganizationMapper;
 import dev.marcos.ticketflow_api.repository.MemberRepository;
 import dev.marcos.ticketflow_api.repository.OrganizationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,6 +59,7 @@ public class OrganizationService {
         return organizationMapper.toOrgDetailDTO(savedOrg);
     }
 
+    @Cacheable(value = "orgs", key = "#user.id")
     public List<OrganizationSummaryResponse> listMyOrganizations(User user) {
         List<Organization> organizations = organizationRepository.findAllByUserId(user.getId());
         return organizations.stream()
@@ -63,6 +67,7 @@ public class OrganizationService {
                 .toList();
     }
 
+    @Cacheable(value = "org", key = "#orgId")
     public OrganizationDetailResponse findById(UUID orgId) {
         Organization org = findEntityById(orgId);
         return organizationMapper.toOrgDetailDTO(org);
@@ -74,6 +79,7 @@ public class OrganizationService {
     }
 
     @Transactional
+    @CachePut(cacheNames = "org", key = "#orgId")
     public OrganizationDetailResponse update(UUID orgId, UpdateOrganizationRequest dto) {
         Organization org = organizationRepository.findById(orgId)
                 .orElseThrow(() -> new NotFoundException("Organização não encontrada"));
@@ -86,6 +92,7 @@ public class OrganizationService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "org", key = "#orgId", beforeInvocation = true)
     public void delete(UUID orgId) {
         Organization org = organizationRepository.findById(orgId)
                 .orElseThrow(() -> new NotFoundException("Organização não encontrada"));

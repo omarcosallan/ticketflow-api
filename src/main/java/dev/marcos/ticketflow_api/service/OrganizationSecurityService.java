@@ -16,12 +16,13 @@ public class OrganizationSecurityService {
     private final MemberRepository memberRepository;
 
     public boolean hasPermission(Authentication authentication, String orgId, String requiredRole) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof User user)) {
+            return false;
+        }
 
-        User user = (User) authentication.getPrincipal();
-
-        if (user == null) return false;
-
-        if (user.getIsSystemAdmin()) return true;
+        if (Boolean.TRUE.equals(user.getIsSystemAdmin())) {
+            return true;
+        }
 
         return memberRepository.findRoleByUserIdAndOrgId(user.getId(), UUID.fromString(orgId))
                 .map(currentRole -> hasAccess(currentRole, OrgRole.valueOf(requiredRole)))
