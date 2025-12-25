@@ -2,10 +2,12 @@ package dev.marcos.ticketflow_api.controller;
 
 import dev.marcos.ticketflow_api.dto.auth.*;
 import dev.marcos.ticketflow_api.dto.user.UserDetailResponse;
+import dev.marcos.ticketflow_api.entity.User;
 import dev.marcos.ticketflow_api.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -37,8 +39,8 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDetailResponse> me() {
-        return ResponseEntity.ok(authService.getCurrentUser());
+    public ResponseEntity<UserDetailResponse> me(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(authService.getCurrentUser(user));
     }
 
     @PostMapping("/refresh")

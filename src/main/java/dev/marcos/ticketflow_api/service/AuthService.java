@@ -115,8 +115,7 @@ public class AuthService {
         return new TokenResponse(newAccessToken, newRefreshToken.getToken());
     }
 
-    public UserDetailResponse getCurrentUser() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public UserDetailResponse getCurrentUser(User user) {
         return userMapper.toUserDetailDTO(user);
     }
 

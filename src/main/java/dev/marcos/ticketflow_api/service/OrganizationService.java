@@ -56,12 +56,8 @@ public class OrganizationService {
         return organizationMapper.toOrgDetailDTO(savedOrg);
     }
 
-    public List<OrganizationSummaryResponse> listMyOrganizations() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UUID userId = user.getId();
-
-        List<Organization> organizations = organizationRepository.findAllByUserId(userId);
-
+    public List<OrganizationSummaryResponse> listMyOrganizations(User user) {
+        List<Organization> organizations = organizationRepository.findAllByUserId(user.getId());
         return organizations.stream()
                 .map(organizationMapper::toOrgSummaryDTO)
                 .toList();

@@ -4,12 +4,14 @@ import dev.marcos.ticketflow_api.dto.organization.CreateOrganizationRequest;
 import dev.marcos.ticketflow_api.dto.organization.OrganizationDetailResponse;
 import dev.marcos.ticketflow_api.dto.organization.OrganizationSummaryResponse;
 import dev.marcos.ticketflow_api.dto.organization.UpdateOrganizationRequest;
+import dev.marcos.ticketflow_api.entity.User;
 import dev.marcos.ticketflow_api.service.OrganizationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,8 +30,8 @@ public class OrganizationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<OrganizationSummaryResponse>> listMine() {
-        return ResponseEntity.ok(organizationService.listMyOrganizations());
+    public ResponseEntity<List<OrganizationSummaryResponse>> listMine(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(organizationService.listMyOrganizations(user));
     }
 
     @GetMapping("/{orgId}")
