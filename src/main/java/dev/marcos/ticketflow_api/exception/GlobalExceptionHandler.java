@@ -7,6 +7,7 @@ import dev.marcos.ticketflow_api.dto.exception.ProblemDetail;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.AuthenticationException;
@@ -14,6 +15,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -74,6 +76,44 @@ public class GlobalExceptionHandler {
                 getRequestPath(req));
 
         problem.setProperty("errors", errors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ProblemDetail> handleMethodArgumentTypeMismatch(
+            MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+
+        String detail = String.format(
+                "O parâmetro '%s' possui o valor inválido '%s'. Tipo esperado: %s",
+                ex.getName(),
+                ex.getValue(),
+                ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "desconhecido");
+
+        ProblemDetail problem = new ProblemDetail(
+                "Parâmetro inválido",
+                detail,
+                HttpStatus.BAD_REQUEST.value(),
+                getRequestPath(request));
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ProblemDetail> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex, HttpServletRequest request) {
+
+        String detail = "O corpo da solicitação é inválido ou está malformado";
+
+        if (ex.getCause() != null) {
+            detail += ": " + ex.getCause().getMessage();
+        }
+
+        ProblemDetail problem = new ProblemDetail(
+                "Solicitação JSON malformada",
+                detail,
+                HttpStatus.BAD_REQUEST.value(),
+                getRequestPath(request));
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
     }
