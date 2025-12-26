@@ -23,6 +23,7 @@ public class RefreshTokenService {
     private final UserService userService;
 
     public RefreshToken createRefreshToken(UUID userId) {
+
         User user = userService.findById(userId);
 
         RefreshToken refreshToken = new RefreshToken();

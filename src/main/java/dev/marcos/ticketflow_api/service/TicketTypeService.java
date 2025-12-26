@@ -7,6 +7,7 @@ import dev.marcos.ticketflow_api.entity.TicketType;
 import dev.marcos.ticketflow_api.mapper.TicketTypeMapper;
 import dev.marcos.ticketflow_api.repository.TicketTypeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ public class TicketTypeService {
     private final TicketTypeMapper mapper;
 
     @Transactional
+    @CacheEvict(value = "events", allEntries = true)
     public TicketTypeAdminResponse create(UUID orgId, UUID eventId, CreateTicketTypeRequest dto) {
         Event event = eventService.findEntityById(orgId, eventId);
 

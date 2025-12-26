@@ -12,7 +12,7 @@ import dev.marcos.ticketflow_api.repository.EventRepository;
 import dev.marcos.ticketflow_api.repository.TicketTypeRepository;
 import dev.marcos.ticketflow_api.repository.projections.EventStats;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +37,7 @@ public class EventService {
     private final TicketTypeRepository ticketTypeRepository;
 
     @Transactional
+    @CacheEvict(value = "events", allEntries = true)
     public EventDetailResponse save(UUID orgId, CreateEventRequest dto) {
 
         if (!dto.startDateTime().isBefore(dto.endDateTime())) {
@@ -87,7 +88,6 @@ public class EventService {
         return eventRepository.findAll(specs, pageable).stream().map(eventMapper::toEventSummaryDTO).toList();
     }
 
-
     @Cacheable(value = "events", key = "#user.id")
     public List<EventSummaryResponse> findAllPurchased(User user) {
         return eventRepository.findAllPurchasedByUserId(user.getId()).stream().map(eventMapper::toEventSummaryDTO).toList();
@@ -100,7 +100,7 @@ public class EventService {
     }
 
     @Transactional
-    @CachePut(cacheNames = "event", key = "#eventId")
+    @CacheEvict(value = "events", allEntries = true)
     public EventDetailResponse update(UUID orgId, UUID eventId, UpdateEventRequest dto) {
         if (!dto.startDateTime().isBefore(dto.endDateTime())) {
             throw new BusinessException("A data de início deve ser anterior à data de fim.");
@@ -125,7 +125,7 @@ public class EventService {
     }
 
     @Transactional
-    @CachePut(cacheNames = "event", key = "#eventId")
+    @CacheEvict(value = "events", allEntries = true)
     public EventDetailResponse updateStatus(UUID orgId, UUID eventId, UpdateEventStatusRequest dto) {
         Event event = findEntityById(orgId, eventId);
 
