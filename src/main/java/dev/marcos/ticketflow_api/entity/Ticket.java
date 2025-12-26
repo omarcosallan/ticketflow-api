@@ -15,7 +15,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Ticket {
+public class Ticket extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

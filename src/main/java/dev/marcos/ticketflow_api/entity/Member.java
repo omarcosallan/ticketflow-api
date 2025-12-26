@@ -14,7 +14,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Member {
+public class Member extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
