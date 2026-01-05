@@ -3,6 +3,7 @@ package dev.marcos.ticketflow_api.service;
 import dev.marcos.ticketflow_api.entity.RefreshToken;
 import dev.marcos.ticketflow_api.entity.User;
 import dev.marcos.ticketflow_api.exception.BusinessException;
+import dev.marcos.ticketflow_api.exception.NotFoundException;
 import dev.marcos.ticketflow_api.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,11 +23,14 @@ public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserService userService;
 
+    @Transactional
     public RefreshToken createRefreshToken(UUID userId) {
 
         User user = userService.findById(userId);
 
-        RefreshToken refreshToken = new RefreshToken();
+        RefreshToken refreshToken = refreshTokenRepository.findByUser(user)
+                .orElse(new RefreshToken());
+
         refreshToken.setUser(user);
         refreshToken.setToken(UUID.randomUUID().toString());
         refreshToken.setExpiryDate(Instant.now().plusSeconds(refreshTokenDurationSeconds));
@@ -36,16 +40,14 @@ public class RefreshTokenService {
 
     public RefreshToken findByToken(String token) {
         return refreshTokenRepository.findByToken(token)
-                .orElseThrow(() -> new BusinessException("Refresh token não encontrado"));
+                .orElseThrow(() -> new NotFoundException("Refresh token não encontrado"));
     }
 
-    @Transactional
-    public RefreshToken verifyExpiration(RefreshToken token) {
-        if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
-            delete(token);
+    public void verifyExpiration(RefreshToken token) {
+        if (token.getExpiryDate().isBefore(Instant.now())) {
+            refreshTokenRepository.delete(token);
             throw new BusinessException("Refresh token expirado. Faça login novamente");
         }
-        return token;
     }
 
     @Transactional
