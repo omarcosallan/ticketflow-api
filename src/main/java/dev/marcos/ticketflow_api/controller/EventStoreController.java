@@ -5,6 +5,8 @@ import dev.marcos.ticketflow_api.dto.event.EventSummaryResponse;
 import dev.marcos.ticketflow_api.entity.User;
 import dev.marcos.ticketflow_api.entity.enums.EventStatus;
 import dev.marcos.ticketflow_api.service.EventService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +20,15 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/events")
 @RequiredArgsConstructor
+@Tag(name = "Events Store", description = "Endpoints for Events Store.")
 public class EventStoreController {
 
     private final EventService eventService;
 
     @GetMapping
+    @Operation(
+            summary = "List Events",
+            description = "Retrieve a paginated list of events with optional filtering.")
     public ResponseEntity<List<EventSummaryResponse>> findAll(@RequestParam(required = false, defaultValue = "0") int page,
                                                               @RequestParam(required = false, defaultValue = "10") int size,
                                                               @RequestParam(required = false) String title,
@@ -33,11 +39,15 @@ public class EventStoreController {
     }
 
     @GetMapping("/{eventId}")
+    @Operation(summary = "Get Event by ID", description = "Retrieve a event by its ID")
     public ResponseEntity<EventDetailResponse> findById(@PathVariable UUID eventId) {
         return ResponseEntity.ok(eventService.findById(eventId));
     }
 
     @GetMapping("/purchased")
+    @Operation(
+            summary = "List Events purchases",
+            description = "Retrieve a list of all purchased events.")
     public ResponseEntity<List<EventSummaryResponse>> findAllPurchased(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(eventService.findAllPurchased(user));
     }
